@@ -1,25 +1,24 @@
 <template>
   <section class="d-flex justify-content-center align-items-center" style="margin-top: 100px">
     <div id="urna" class="d-flex justify-content-around align-items-center">
-      <div id="display" class="text-black d-flex">
+      <div id="display" class="text-black d-flex justify-content-lg-between p-3">
         <div>
-          <h3 class="align-self-start">Nome Candidato</h3>
-          <div class="align-self-end bg-secondary">
+          <h3 class="mt-5">{{ nome }}</h3>
+          <div class="mt-5">
             <div class="">
               <label>Numero: </label>
-              <input type="number" readonly v-model="inputNumero" />
-            </div>
-
-            <div>
-              <label>Nome: </label>
-              <span>asdasd</span>
+              <input type="number" readonly maxlength="5" v-model="numero" />
             </div>
 
             <div>
               <label>Partido: </label>
-              <span>{{ inputNumero }}</span>
+              <span style="margin-left: 15px">{{ partido }}</span>
+              <p>{{ validaVoto }}</p>
             </div>
           </div>
+        </div>
+        <div id="foto">
+          <img src="" alt="" />
         </div>
       </div>
       <div id="buttons bg-warning">
@@ -42,9 +41,9 @@
           <button class="btn" @click="addNumber(0)">0</button>
         </div>
         <div class="d-flex btn-numeros justify-content-center">
-          <button class="btn border bg-white text-black" @click="">Branco</button>
+          <button class="btn border bg-white text-black" @click="branco">Branco</button>
           <button class="btn btn-warning text-black" @click="corrige">Corrige</button>
-          <button class="btn btn-success text-black" @click="">Confirma</button>
+          <button class="btn btn-success text-black" @click="confirma">Confirma</button>
         </div>
       </div>
     </div>
@@ -61,10 +60,19 @@
 
 #display {
   background-color: white;
-  width: 50%;
+  width: 60%;
   height: 300px;
   border-radius: 10px;
-  border: 8px solid black;
+  border: 5px solid black;
+}
+
+#foto {
+  width: 150px;
+  height: 150px;
+  background-color: rgb(213, 213, 213);
+  border-radius: 10px;
+  border: 3px solid black;
+  margin-top: 20%;
 }
 
 .btn-numeros button {
@@ -73,18 +81,92 @@
   height: 60px;
   margin: 5px;
 }
+
+input {
+  border: 0.5px solid grey;
+  width: 100px;
+  margin-left: 10px;
+}
+
+input:focus {
+  outline: none;
+}
 </style>
 
 <script setup>
 import { ref } from 'vue'
 
-const inputNumero = ref('')
+const numero = ref('')
+const nome = ref('Nome do Candidato')
+const partido = ref('')
+const validaVoto = ref(false)
+
+const listaCandidatos = [
+  {
+    numero: 101234,
+    nome: 'João da Silva',
+    partido: 'Partido dos trabalhadores',
+    foto: 'src/assets/images/foto.jpg'
+  },
+  {
+    numero: 111234,
+    nome: 'Maria de Souza',
+    partido: 'Partido da união',
+    foto: 'src/assets/images/foto.jpg'
+  },
+  {
+    numero: 121234,
+    nome: 'Wesley Santos',
+    partido: 'Partido Democratico',
+    foto: 'src/assets/images/foto.jpg'
+  }
+]
+
+const audioBtn = new Audio('src/assets/sounds/btn-sound.mp3')
+const audioConfirm = new Audio('src/assets/sounds/btn-conf-sound.mp3')
 
 function addNumber(n) {
-  inputNumero.value += n
+  numero.value += n
+  audioBtn.play()
+
+  if (numero.value.length > 6) {
+    numero.value = numero.value.slice(0, 6)
+  }
+
+  if (numero.value.length === 6) {
+    const candidato = listaCandidatos.find((c) => c.numero === parseInt(numero.value))
+    if (candidato) {
+      nome.value = candidato.nome
+      partido.value = candidato.partido
+      validaVoto.value = true
+    } else {
+      nome.value = 'Candidato não encontrado'
+      partido.value = ''
+      validaVoto.value = false
+    }
+  } else {
+    nome.value = 'Nome do Candidato'
+    partido.value = ''
+  }
 }
 
 function corrige() {
-    inputNumero.value = ''
+  numero.value = ''
+  nome.value = 'Nome do Candidato'
+  partido.value = ''
+  validaVoto.value = false 
+  audioBtn.play()
+}
+
+function branco() {
+  numero.value = '000000'
+  nome.value = 'Voto em Branco'
+  audioBtn.play()
+}
+
+function confirma() {
+  if (validaVoto.value == true) {
+    audioConfirm.play()
+  }
 }
 </script>
